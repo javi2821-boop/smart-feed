@@ -1,13 +1,37 @@
-# Placeholder so the workflow can be started by hand from the build branch.
-# The real workflow is on build/smart-feed and arrives here when Javi merges it.
+# Publish the feed page and the clips to Cloudflare Pages, by hand. The factory does the same thing after it makes
+# clips; this workflow is for the first setup, for after a change to the feed page, and for checking the lock.
+#
+# It only runs once the repo variable FEED_DEPLOY_ENABLED is "true", and the deploy step refuses to upload clips to
+# an address that is not locked by Cloudflare Access (it uploads a blank page instead and says what to do).
 name: deploy-feed
+
 on:
   workflow_dispatch:
+
+concurrency:
+  group: factory
+  cancel-in-progress: false
+
 permissions:
   contents: read
+
 jobs:
-  placeholder:
+  deploy:
     runs-on: ubuntu-24.04
-    timeout-minutes: 1
+    timeout-minutes: 15
     steps:
-      - run: echo "Not merged yet. Run this workflow from the build/smart-feed branch."
+      - name: Is publishing switched on?
+        if: vars.FEED_DEPLOY_ENABLED != 'true'
+        run: |
+          echo "::error::Publishing is switched off. Set the repo variable FEED_DEPLOY_ENABLED to true (docs/FEED-SETUP.md, step 2)."
+          exit 1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish the feed
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PAGES_PROJECT: ${{ vars.PAGES_PROJECT }}
+        run: node factory/deploy.js

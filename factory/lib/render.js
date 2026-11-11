@@ -9,8 +9,8 @@ import { log } from '../../src/log.js';
 
 export { closeBrowser, probe, REPO_ROOT };
 
-/** Encoder settings every clip shares: small files (a 45 s clip stays well under 10 MB), web-streamable. */
-export const OUTPUT = { crf: 23, preset: 'medium', maxBitrate: '1400k', audioBitrate: '96k', frameFormat: 'jpeg', loudness: { lufs: -16, truePeak: -1.5 } };
+/** Encoder settings every clip shares. Flat paper art compresses well: a 40 s clip is about 1.5 MB (the limit is 10 MB). */
+export const OUTPUT = { crf: 27, preset: 'veryfast', maxBitrate: '1400k', audioBitrate: '64k', frameFormat: 'jpeg', loudness: { lufs: -16, truePeak: -1.5 } };
 
 /**
  * Render a composition to `out` (.mp4), or stills when `still` is a list of seconds (out-01.png, ...).
