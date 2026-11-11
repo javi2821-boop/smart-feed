@@ -1,3 +1,56 @@
 {
-  "clips": []
+  "clips": [
+    {
+      "id": "lincoln-unsent-letter",
+      "type": "story",
+      "title": "The letter Lincoln never sent",
+      "source": "Lincoln's unsent letter to General Meade, July 1863 (paraphrased)",
+      "character": "old-man",
+      "background": "study",
+      "file": "clips/lincoln-unsent-letter.mp4",
+      "poster": "clips/lincoln-unsent-letter.jpg",
+      "seconds": 39.73,
+      "bytes": 1651091,
+      "added": "2026-11-11T00:38:01.180Z"
+    },
+    {
+      "id": "marcus-control",
+      "type": "lesson",
+      "title": "What is yours to control",
+      "source": "Marcus Aurelius, Meditations (paraphrased)",
+      "character": "philosopher",
+      "background": "study",
+      "file": "clips/marcus-control.mp4",
+      "poster": "clips/marcus-control.jpg",
+      "seconds": 38.4,
+      "bytes": 1528906,
+      "added": "2026-11-11T00:40:39.829Z"
+    },
+    {
+      "id": "matthew-one-day",
+      "type": "scripture",
+      "title": "One day's strength",
+      "source": "Matthew 6:34 (KJV)",
+      "character": "pastor",
+      "background": "church",
+      "file": "clips/matthew-one-day.mp4",
+      "poster": "clips/matthew-one-day.jpg",
+      "seconds": 38.3,
+      "bytes": 1458452,
+      "added": "2026-11-11T00:43:39.587Z"
+    },
+    {
+      "id": "nozick-machine",
+      "type": "question",
+      "title": "The experience machine",
+      "source": "Robert Nozick, Anarchy, State, and Utopia (1974)",
+      "character": "scientist",
+      "background": "workshop",
+      "file": "clips/nozick-machine.mp4",
+      "poster": "clips/nozick-machine.jpg",
+      "seconds": 40.07,
+      "bytes": 1833666,
+      "added": "2026-11-11T00:46:21.897Z"
+    }
+  ]
 }
