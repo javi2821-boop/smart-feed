@@ -44,7 +44,7 @@ def main():
         wav = os.path.join(OUT, f"{label}.wav")
         mp3 = os.path.join(OUT, f"{label}.mp3")
         t1 = time.time()
-        r = tts.narrate(kokoro, text, voice, wav)
+        r = tts.narrate(kokoro, text, voice, wav, lo=36, hi=44, target=38)
         took = time.time() - t1
         if not r["ok"]:
             print(f"{label}: {r}")
@@ -62,7 +62,7 @@ def main():
     lines = [
         "# Voice samples",
         "",
-        "Three Kokoro voices reading the same Lesson script (`voice/sample-lesson.txt`), at Kokoro's normal speed.",
+        "Three Kokoro voices reading the same Lesson script (`voice/sample-lesson.txt`). A take that lands outside 36 to 44 seconds at normal speed is read again at a speed that aims for 38 seconds (the Speed column; 1.0 is Kokoro's normal pace).",
         "",
         "| Sample | Kokoro voice | Words | Length | Speed | Loudest sample | 35 to 45 s | No clipping | Time to make |",
         "|---|---|---|---|---|---|---|---|---|",

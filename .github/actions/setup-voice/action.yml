@@ -33,7 +33,9 @@ runs:
     - name: Check model files
       shell: bash
       run: |
-        # exact sizes of the published files; a short or changed download fails here, not as a strange voice
-        test "$(stat -c %s voice/models/kokoro-v1.0.onnx)" = 325532387
-        test "$(stat -c %s voice/models/voices-v1.0.bin)" = 28214398
+        # the checksums of the files this build was tested with; a short or changed download fails here, not as a strange voice
+        sha256sum -c - <<'SUMS'
+        7d5df8ecf7d4b1878015a32686053fd0eebe2bc377234608764cc0ef3636a6c5  voice/models/kokoro-v1.0.onnx
+        bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d  voice/models/voices-v1.0.bin
+        SUMS
         echo "Kokoro model files present (cache hit: ${{ steps.models.outputs.cache-hit || 'false' }})"
