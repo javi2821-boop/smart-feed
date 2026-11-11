@@ -1,0 +1,8 @@
+{
+  "name": "render-machine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Lets Node resolve the bare 'render-machine' import the copied engine uses (in render-machine it is the package's own name).",
+  "exports": { ".": "./index.js" }
+}

@@ -1,0 +1,39 @@
+name: setup-voice
+description: Python, Kokoro (kokoro-onnx) and its model files. The model files are cached so runs don't download them again.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: pip
+        cache-dependency-path: voice/requirements.txt
+
+    - name: Install Kokoro
+      shell: bash
+      run: pip install -q -r voice/requirements.txt
+
+    - name: Kokoro model cache
+      id: models
+      uses: actions/cache@v4
+      with:
+        path: voice/models
+        key: kokoro-v1.0-fp32-model-files-v1.0
+
+    - name: Download Kokoro model files (only when the cache is empty)
+      if: steps.models.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p voice/models
+        base=https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0
+        curl -sSfL --retry 3 -o voice/models/kokoro-v1.0.onnx "$base/kokoro-v1.0.onnx"
+        curl -sSfL --retry 3 -o voice/models/voices-v1.0.bin "$base/voices-v1.0.bin"
+        sha256sum voice/models/*
+
+    - name: Check model files
+      shell: bash
+      run: |
+        # exact sizes of the published files; a short or changed download fails here, not as a strange voice
+        test "$(stat -c %s voice/models/kokoro-v1.0.onnx)" = 325532387
+        test "$(stat -c %s voice/models/voices-v1.0.bin)" = 28214398
+        echo "Kokoro model files present (cache hit: ${{ steps.models.outputs.cache-hit || 'false' }})"

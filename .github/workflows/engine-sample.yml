@@ -1,13 +1,30 @@
-# Placeholder so the workflow can be started by hand from the build branch.
-# The real workflow is on build/smart-feed and arrives here when Javi merges it.
+# Phase 1 check: the copied engine renders its own sample clip on a GitHub runner.
+# Started by hand only (Actions tab, or `gh workflow run engine-sample --ref <branch>`), so it never spends minutes on its own.
 name: engine-sample
+
 on:
   workflow_dispatch:
+
+concurrency:
+  group: engine-sample-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
+
 jobs:
-  placeholder:
+  sample:
     runs-on: ubuntu-24.04
-    timeout-minutes: 1
+    timeout-minutes: 10
     steps:
-      - run: echo "Not merged yet. Run this workflow from the build/smart-feed branch."
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-render
+      - name: Tests
+        run: npm test
+      - name: Render the engine's sample clip
+        run: node factory/render-sample.js | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-sample
+          path: out/engine-sample.mp4
+          retention-days: 3
