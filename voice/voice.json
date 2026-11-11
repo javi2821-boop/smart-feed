@@ -1,5 +1,5 @@
 {
   "voice": "am_michael",
   "wordsPerSecond": 2.79,
-  "note": "The one narrator for every clip. Stand-in until Javi picks from voice/samples/. wordsPerSecond is how fast this voice reads at normal speed (measured on the sample script); the factory uses it to choose a reading speed that lands the clip between 35 and 45 seconds."
+  "note": "The one narrator for every clip: Kokoro's am_michael, the 'warm male' sample. Javi chose it on 2026-11-10 from voice/samples/. wordsPerSecond is how fast this voice reads at normal speed (measured on the sample script); the factory uses it to choose a reading speed that lands the clip between 35 and 45 seconds."
 }
