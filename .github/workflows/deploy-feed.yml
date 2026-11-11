@@ -1,0 +1,13 @@
+# Placeholder so the workflow can be started by hand from the build branch.
+# The real workflow is on build/smart-feed and arrives here when Javi merges it.
+name: deploy-feed
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  placeholder:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - run: echo "Not merged yet. Run this workflow from the build/smart-feed branch."
