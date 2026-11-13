@@ -1,12 +1,12 @@
 # Smart Feed
 
-A private, TikTok-style swipe feed for one person (Javi). Each clip is 35 to 45 seconds: a paper-cutout puppet narrates **one small idea**. It exists to replace mindless scrolling with something worth thinking about.
+A TikTok-style swipe feed made for one person (Javi), at https://javi2821-boop.github.io/smart-feed/. The repo and the feed are public (Javi's choice), so nothing private ever goes in here. Each clip is 35 to 45 seconds: a paper-cutout puppet narrates **one small idea**. It exists to replace mindless scrolling with something worth thinking about.
 
 This page is written for **Muse**, the bot that runs the factory from here on. It assumes you have never seen how this was built. Everything runs inside GitHub; nothing depends on anyone's computer being on.
 
 ## How it works, in one paragraph
 
-You add a small text file (a "script") to the folder `scripts/inbox/`. That starts a GitHub Actions workflow called **factory**. The factory checks the script, reads it aloud with an open-source voice (Kokoro), renders the video, adds it to the feed's list, moves your script to `scripts/done/`, and publishes the feed to a private web page that only Javi can open. If a script has a problem, it moves to `scripts/failed/` with a note saying exactly what is wrong.
+You add a small text file (a "script") to the folder `scripts/inbox/`. That starts a GitHub Actions workflow called **factory**. The factory checks the script, reads it aloud with an open-source voice (Kokoro), renders the video, adds it to the feed's list, moves your script to `scripts/done/`, and publishes the feed to its web page. If a script has a problem, it moves to `scripts/failed/` with a note saying exactly what is wrong.
 
 ## The four kinds of clip
 
@@ -86,9 +86,9 @@ Read the `.why.txt` note. It names the step that failed and what to change.
 
 **The run never started.** Check that the file was committed to `scripts/inbox/` (not `scripts/` or `inbox/`) on `main`. A commit that only touches other folders does not start the factory. You can also start it by hand: Actions > **factory** > **Run workflow**.
 
-**The run is red but no script is in `scripts/failed/`.** The factory itself broke before or after the scripts (for example GitHub refused to start the job because the account's free Actions minutes ran out for the month, or the "Save the results" step could not push). Open the run, read the red step's log, and tell Javi. **Never change billing or spending settings to get a run through.**
+**The run is red but no script is in `scripts/failed/`.** The factory itself broke before or after the scripts (for example the "Save the results" step could not push). Open the run, read the red step's log, and tell Javi. **Never change billing or spending settings to get a run through.**
 
-**The feed did not update, or the "Publish the feed" step is red.** Open the run summary's "Feed publish" section. "Not published" means a secret is missing or the password is too short. "LOCK PROBLEM" means the password lock could not be proven, so the feed was replaced with a blank locked page on purpose. Either way no clip is exposed. Tell Javi at once; [`docs/FEED-SETUP.md`](docs/FEED-SETUP.md) explains the setup.
+**The feed did not update, or the "publish the feed" job is red.** Open that job in the run. Its last step checks that the live address lists the expected number of clips and says what it found. Run the **deploy-feed** workflow once to try again. If it fails twice, tell Javi. On the phone, pull down or reopen the feed: a new clip takes a minute or two to appear.
 
 ## 4. How to add a new character
 
@@ -126,16 +126,18 @@ By hand, without the tool: delete `clips/<name>.mp4` and `clips/<name>.jpg`, del
 
 ## 6. Where the feed is
 
-The feed is a private page on Cloudflare Pages, locked with a password that only Javi has (the lock is `feed/_worker.js`; the password lives in the GitHub secret `FEED_PASSWORD`, never in a file). Its address is recorded in [`STATUS.md`](STATUS.md) once the setup in [`docs/FEED-SETUP.md`](docs/FEED-SETUP.md) is finished. **Do not share the address, the password or any clip.** Opening it signed out shows only a password box, which is correct. **Never delete or edit `feed/_worker.js`**: the publish step refuses to upload without it.
+**https://javi2821-boop.github.io/smart-feed/**
+
+The feed is hosted by GitHub Pages, straight from this repo. It is public: anyone with the address can watch, and anyone can read this repo. There is no password. [`docs/FEED-SETUP.md`](docs/FEED-SETUP.md) explains how publishing works and how to put the feed on a phone.
 
 On the phone it behaves like any short-video app: swipe up for the next clip, tap once for sound (it stays on), tap again to pause. Unwatched clips come first with the four types mixed. It remembers what has been watched on that phone, and can be added to the home screen.
 
 ## 7. Limits to respect
 
-- **GitHub Actions minutes.** A private repo on a free account gets 2,000 minutes a month, shared across all of Javi's private repos. One factory run costs about 2 minutes of setup plus about 3 to 5 minutes per clip. Three clips a day in one commit is roughly 400 to 500 minutes a month. Never raise a spending limit or change billing; if minutes run out, runs simply wait for next month, and you tell Javi.
+- **GitHub Actions minutes.** Standard runners are free for a public repo, so the factory has no monthly allowance to run out of. Still batch scripts into one commit: it is faster. Never raise a spending limit or change billing.
 - **Clip size.** A clip must be under 10 MB (they are usually 1.5 to 2 MB). The factory enforces this.
-- **Storage.** Clips live in this repo. Around 600 clips (about 1 GB) it is time to ask Javi whether to prune old ones. Do not move storage anywhere else without asking him.
-- **Secrets.** No tokens, emails or account IDs in any file, ever. They live in GitHub Actions secrets and the Cloudflare dashboard, and only Javi adds them.
+- **Storage.** GitHub Pages allows a site of about 1 GB, roughly 600 clips. The build step warns in the run when the feed passes 900 MB. Then ask Javi whether to prune old clips. Do not move storage anywhere else without asking him.
+- **Nothing private in this repo.** It is public. No tokens, emails, account IDs or personal notes in any file, ever. The factory needs no secrets.
 - **Don't edit the engine** (`engine/`, `src/`). It is a copy from another repo; [`ENGINE.md`](ENGINE.md) explains how to update it.
 
 ## Folder map
