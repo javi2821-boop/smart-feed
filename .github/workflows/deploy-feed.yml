@@ -2,7 +2,7 @@
 # clips; this workflow is for the first setup, for after a change to the feed page, and for checking the lock.
 #
 # It only runs once the repo variable FEED_DEPLOY_ENABLED is "true", and the deploy step refuses to upload clips to
-# an address that is not locked by Cloudflare Access (it uploads a blank page instead and says what to do).
+# an unlocked address: it puts the password lock up first and proves it, before and after.
 name: deploy-feed
 
 on:
@@ -33,5 +33,6 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          FEED_PASSWORD: ${{ secrets.FEED_PASSWORD }}
           PAGES_PROJECT: ${{ vars.PAGES_PROJECT }}
         run: node factory/deploy.js

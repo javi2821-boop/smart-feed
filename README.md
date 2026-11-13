@@ -88,7 +88,7 @@ Read the `.why.txt` note. It names the step that failed and what to change.
 
 **The run is red but no script is in `scripts/failed/`.** The factory itself broke before or after the scripts (for example GitHub refused to start the job because the account's free Actions minutes ran out for the month, or the "Save the results" step could not push). Open the run, read the red step's log, and tell Javi. **Never change billing or spending settings to get a run through.**
 
-**The feed did not update but the run is green.** Look at the run summary's "Feed publish" section. If it says the address is "NOT locked", the clips were held back on purpose: the page's privacy lock (Cloudflare Access) is missing. Tell Javi at once; [`docs/FEED-SETUP.md`](docs/FEED-SETUP.md) step 3 fixes it.
+**The feed did not update, or the "Publish the feed" step is red.** Open the run summary's "Feed publish" section. "Not published" means a secret is missing or the password is too short. "LOCK PROBLEM" means the password lock could not be proven, so the feed was replaced with a blank locked page on purpose. Either way no clip is exposed. Tell Javi at once; [`docs/FEED-SETUP.md`](docs/FEED-SETUP.md) explains the setup.
 
 ## 4. How to add a new character
 
@@ -126,7 +126,7 @@ By hand, without the tool: delete `clips/<name>.mp4` and `clips/<name>.jpg`, del
 
 ## 6. Where the feed is
 
-The feed is a private page on Cloudflare Pages, locked with Cloudflare Access so that only Javi's email can open it. Its address is recorded in [`STATUS.md`](STATUS.md) once the setup in [`docs/FEED-SETUP.md`](docs/FEED-SETUP.md) is finished. **Do not share the address or any clip.** Opening it signed out shows a Cloudflare sign-in page, which is correct.
+The feed is a private page on Cloudflare Pages, locked with a password that only Javi has (the lock is `feed/_worker.js`; the password lives in the GitHub secret `FEED_PASSWORD`, never in a file). Its address is recorded in [`STATUS.md`](STATUS.md) once the setup in [`docs/FEED-SETUP.md`](docs/FEED-SETUP.md) is finished. **Do not share the address, the password or any clip.** Opening it signed out shows only a password box, which is correct. **Never delete or edit `feed/_worker.js`**: the publish step refuses to upload without it.
 
 On the phone it behaves like any short-video app: swipe up for the next clip, tap once for sound (it stays on), tap again to pause. Unwatched clips come first with the four types mixed. It remembers what has been watched on that phone, and can be added to the home screen.
 

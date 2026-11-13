@@ -6,7 +6,7 @@
 #      A script that fails here also moves to scripts/failed with a note. One bad script never stops the others.
 #   3. Commits the results to the branch it ran on.
 #   4. Publishes the feed to Cloudflare Pages (only once the repo variable FEED_DEPLOY_ENABLED is "true", and the
-#      deploy step itself refuses to upload clips to an address that is not locked by Cloudflare Access).
+#      deploy step uploads the password lock with every publish and proves it works before and after).
 #   5. Ends red if any script failed, so a failure is visible in the Actions list. The good clips are already saved.
 name: factory
 
@@ -78,6 +78,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          FEED_PASSWORD: ${{ secrets.FEED_PASSWORD }}
           PAGES_PROJECT: ${{ vars.PAGES_PROJECT }}
         run: node factory/deploy.js
 

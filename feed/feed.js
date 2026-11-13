@@ -195,7 +195,7 @@
       if (!soundOn) soundBtn.hidden = false;
       if (again) activate(0);
     } catch (e) {
-      // behind Cloudflare Access an expired sign-in answers with a login page instead of JSON: reloading shows it
+      // when the sign-in has expired, the lock answers with the password page instead of JSON: reloading shows it
       // (at most once a minute, so a real outage never turns into a reload loop)
       let last = 0;
       try { last = Number(sessionStorage.getItem('smartfeed.retried') || 0); } catch { last = Date.now(); }
