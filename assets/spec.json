@@ -1,0 +1,20 @@
+{
+  "note": "The one definition of the cast's file names, sizes and anchor points. The clip template, the placeholder maker, the validator and docs/STYLE-GUIDE.md all read this file.",
+  "parts": {
+    "body": { "file": "body.png", "width": 800, "height": 1000 },
+    "head": { "file": "head.png", "width": 600, "height": 600 },
+    "mouth-closed": { "file": "mouth-closed.png", "width": 200, "height": 120 },
+    "mouth-open": { "file": "mouth-open.png", "width": 200, "height": 120 }
+  },
+  "anchors": {
+    "neck": [400, 90],
+    "headPivot": [300, 540],
+    "mouth": [300, 410]
+  },
+  "background": { "width": 1080, "height": 1920 },
+  "characters": [
+    "philosopher", "pastor", "worker", "dad", "kid", "king", "monk", "mother",
+    "soldier", "scientist", "businessman", "farmer", "teacher", "old-man", "young-woman"
+  ],
+  "backgrounds": ["study", "church", "workshop", "city-street", "open-field"]
+}

@@ -1,0 +1,42 @@
+/* Base styles for the render page. CSS animations and transitions are disabled:
+   every visual change must come from a scene's render(t), otherwise frames
+   would depend on wall-clock time and renders would not be deterministic. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  animation: none !important;
+  transition: none !important;
+  caret-color: transparent;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+}
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  font-kerning: normal;
+  font-synthesis: none;
+}
+#stage {
+  position: relative;
+  overflow: hidden;
+  width: var(--rm-w);
+  height: var(--rm-h);
+  background: var(--c-bg, #000);
+  color: var(--c-text, #fff);
+  font-family: var(--f-body, sans-serif);
+}
+.rm-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  contain: layout paint;
+}
+.rm-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900;
+}

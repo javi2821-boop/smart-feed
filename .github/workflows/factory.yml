@@ -1,13 +1,123 @@
-# Placeholder so the workflow can be started by hand from the build branch.
-# The real workflow is on build/smart-feed and arrives here when Javi merges it.
+# The factory. Runs when a file lands in scripts/inbox (or by hand from the Actions tab).
+#
+#   1. Checks every inbox script's format. Wrong ones move to scripts/failed with a note saying why. This takes
+#      seconds and happens before anything is installed.
+#   2. For each good script: narration (Kokoro), render, checks, add to feed/feed.json, move to scripts/done.
+#      A script that fails here also moves to scripts/failed with a note. One bad script never stops the others.
+#   3. Commits the results to the branch it ran on.
+#   4. Publishes the feed to GitHub Pages (when the repo variable FEED_DEPLOY_ENABLED is "true").
+#   5. Ends red if any script failed, so a failure is visible in the Actions list. The good clips are already saved
+#      and published.
 name: factory
+
 on:
+  push:
+    branches: [main, build/smart-feed]
+    paths: ['scripts/inbox/**']
   workflow_dispatch:
+
+# one factory run at a time; a second push waits its turn instead of racing the first one's commit
+concurrency:
+  group: factory
+  cancel-in-progress: false
+
 permissions:
-  contents: read
+  contents: write
+
 jobs:
-  placeholder:
+  factory:
     runs-on: ubuntu-24.04
-    timeout-minutes: 1
+    timeout-minutes: 60
+    outputs:
+      site: ${{ steps.site.outputs.clips }}
     steps:
-      - run: echo "Not merged yet. Run this workflow from the build/smart-feed branch."
+      - uses: actions/checkout@v4
+
+      - name: Check the scripts' format
+        id: format
+        run: node factory/run.js --format
+
+      - name: Set up the renderer
+        if: steps.format.outputs.good != '0'
+        uses: ./.github/actions/setup-render
+
+      - name: Set up the voice
+        if: steps.format.outputs.good != '0'
+        uses: ./.github/actions/setup-voice
+
+      - name: Check the cast
+        if: steps.format.outputs.good != '0'
+        run: node tools/validate-cast.js
+
+      - name: Make the clips
+        if: steps.format.outputs.good != '0'
+        run: node factory/run.js || echo "At least one script failed; continuing so the good clips are saved."
+
+      - name: Report
+        if: always()
+        run: |
+          if [ -f out/factory-report.md ]; then cat out/factory-report.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Save the results to the branch
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts clips feed/feed.json
+          if git diff --cached --quiet; then echo "Nothing changed."; exit 0; fi
+          made=$(node -p "require('./out/factory-report.json').made.length" 2>/dev/null || echo 0)
+          failed=$(node -p "require('./out/factory-report.json').failed.length" 2>/dev/null || echo 0)
+          git commit -q -m "Factory: $made clip(s) made, $failed script(s) failed"
+          for try in 1 2 3 4; do
+            git push origin "HEAD:$BRANCH" && exit 0
+            git pull --rebase origin "$BRANCH"
+          done
+          echo "Could not push the results after 4 tries." && exit 1
+
+      - name: Build the feed site
+        id: site
+        if: vars.FEED_DEPLOY_ENABLED == 'true'
+        run: node factory/build-site.js
+
+      - name: Hand the site to GitHub Pages
+        if: vars.FEED_DEPLOY_ENABLED == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out/site
+
+      - name: Fail the run if any script failed
+        run: |
+          failed=$(node -p "require('./out/factory-report.json').failed.length" 2>/dev/null || echo 0)
+          if [ "$failed" != "0" ]; then
+            echo "::error::$failed script(s) failed. Each one is in scripts/failed with a .why.txt note beside it."
+            exit 1
+          fi
+
+  publish:
+    name: publish the feed
+    needs: factory
+    # runs even when a script failed, as long as the site was built: the good clips still go out
+    if: ${{ !cancelled() && needs.factory.outputs.site != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+      - name: Check the live feed
+        env:
+          URL: ${{ steps.deploy.outputs.page_url }}
+          WANT: ${{ needs.factory.outputs.site }}
+        run: |
+          for try in 1 2 3 4 5 6; do
+            got=$(curl -fsS "${URL}feed.json?t=$(date +%s)" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).clips.length)}catch{console.log('?')}})" || echo '?')
+            if [ "$got" = "$WANT" ]; then echo "The feed at $URL lists $got clips." | tee -a "$GITHUB_STEP_SUMMARY"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::The feed at $URL lists $got clips, expected $WANT." && exit 1

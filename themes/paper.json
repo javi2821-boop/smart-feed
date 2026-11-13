@@ -1,0 +1,44 @@
+{
+  "name": "paper",
+  "description": "Smart feed: paper cutout puppets. Flat colours, off-white paper edges, a slight drop shadow. One accent colour per clip type. See docs/STYLE-GUIDE.md.",
+  "style": "default",
+  "colors": {
+    "bg": "#f3ead8",
+    "text": "#2b2a33",
+    "accent": "#e0a526",
+    "paper": "#f3ead8",
+    "paperDeep": "#e6d9bf",
+    "edge": "#fbf7ee",
+    "ink": "#2b2a33",
+    "muted": "#6f6a63",
+    "kraft": "#c9a66b",
+    "shadow": "#1d1b26",
+    "lesson": "#e0a526",
+    "question": "#2a8c82",
+    "story": "#d1603d",
+    "scripture": "#4a4e9a"
+  },
+  "fonts": {
+    "display": {
+      "family": "Fraunces",
+      "weight": 600,
+      "weights": [400],
+      "package": "@fontsource/fraunces",
+      "fallback": "serif"
+    },
+    "body": {
+      "family": "DM Sans",
+      "weight": 700,
+      "weights": [500],
+      "package": "@fontsource/dm-sans",
+      "fallback": "sans-serif"
+    }
+  },
+  "motion": {
+    "transition": "cut",
+    "ease": "expoOut"
+  },
+  "decor": {
+    "grain": 0
+  }
+}

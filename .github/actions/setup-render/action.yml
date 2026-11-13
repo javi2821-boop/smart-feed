@@ -1,0 +1,41 @@
+name: setup-render
+description: Node, the pinned packages, ffmpeg and headless Chromium for the copied render engine. Caches what it can to save minutes.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+
+    - name: Install packages
+      shell: bash
+      run: npm ci --no-audit --no-fund
+
+    - name: ffmpeg
+      shell: bash
+      run: |
+        if ! command -v ffmpeg >/dev/null; then
+          sudo apt-get install -y -q --no-install-recommends ffmpeg >/dev/null 2>&1 \
+            || { sudo apt-get update -q >/dev/null && sudo apt-get install -y -q --no-install-recommends ffmpeg >/dev/null; }
+        fi
+        ffmpeg -hide_banner -version | head -1
+
+    - name: Playwright version
+      id: pw
+      shell: bash
+      run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Chromium cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: chromium-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+    - name: Headless Chromium
+      shell: bash
+      run: |
+        npx playwright install chromium
+        # the runner image already has Chromium's system libraries; install them only if a launch fails
+        node -e "import('playwright').then(async ({chromium}) => { const b = await chromium.launch(); await b.close(); })" \
+          || { sudo npx playwright install-deps chromium && node -e "import('playwright').then(async ({chromium}) => { const b = await chromium.launch(); await b.close(); })"; }

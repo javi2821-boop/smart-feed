@@ -1,0 +1,24 @@
+{
+  "name": "smart-feed",
+  "version": "0.1.0",
+  "description": "Private smart feed: short narrated paper-puppet clips, built and published by GitHub Actions.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "sample": "node factory/render-sample.js",
+    "placeholders": "node tools/make-placeholders.js",
+    "validate:cast": "node tools/validate-cast.js",
+    "factory": "node factory/run.js"
+  },
+  "dependencies": {
+    "@fontsource/dm-sans": "5.3.0",
+    "@fontsource/fraunces": "5.3.0",
+    "playwright": "1.56.1",
+    "render-machine": "file:engine/shim"
+  }
+}

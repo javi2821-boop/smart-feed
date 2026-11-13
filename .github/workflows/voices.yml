@@ -1,13 +1,47 @@
-# Placeholder so the workflow can be started by hand from the build branch.
-# The real workflow is on build/smart-feed and arrives here when Javi merges it.
+# Phase 2: three Kokoro voices read the same Lesson script. The MP3s are committed to
+# voice/samples/ on the branch this runs from, with a report of length and peak level.
+# Started by hand only.
 name: voices
+
 on:
   workflow_dispatch:
+    inputs:
+      voices:
+        description: 'label=kokoro_voice pairs'
+        default: 'warm-male=am_michael calm-deep-male=am_fenrir warm-female=af_heart'
+
+concurrency:
+  group: voices-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
-  contents: read
+  contents: write
+
 jobs:
-  placeholder:
+  voices:
     runs-on: ubuntu-24.04
-    timeout-minutes: 1
+    timeout-minutes: 15
     steps:
-      - run: echo "Not merged yet. Run this workflow from the build/smart-feed branch."
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-voice
+      - name: ffmpeg
+        run: |
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get install -y -q --no-install-recommends ffmpeg >/dev/null 2>&1 \
+              || { sudo apt-get update -q >/dev/null && sudo apt-get install -y -q --no-install-recommends ffmpeg >/dev/null; }
+          fi
+      - name: Read the sample script in each voice
+        env:
+          VOICES: ${{ inputs.voices }}
+        run: python voice/samples.py $VOICES
+      - name: Report
+        if: always()
+        run: cat voice/samples/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Commit the samples to this branch
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add voice/samples
+          git diff --cached --quiet || git commit -q -m "Voice samples: three Kokoro voices reading the same Lesson script"
+          git push origin HEAD:${{ github.ref_name }}

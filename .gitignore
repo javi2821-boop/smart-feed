@@ -1,0 +1,9 @@
+node_modules/
+out/
+.cache/
+*.part-*.mp4
+.DS_Store
+.wrangler/
+__pycache__/
+.venv/
+voice/models/
