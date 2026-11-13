@@ -1,8 +1,5 @@
-# Publish the feed page and the clips to Cloudflare Pages, by hand. The factory does the same thing after it makes
-# clips; this workflow is for the first setup, for after a change to the feed page, and for checking the lock.
-#
-# It only runs once the repo variable FEED_DEPLOY_ENABLED is "true", and the deploy step refuses to upload clips to
-# an unlocked address: it puts the password lock up first and proves it, before and after.
+# Publish the feed page and the clips to GitHub Pages, by hand. The factory does the same thing after it makes
+# clips; this workflow is for after a change to the feed page itself, or after removing a clip.
 name: deploy-feed
 
 on:
@@ -16,23 +13,47 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 10
+    outputs:
+      site: ${{ steps.site.outputs.clips }}
     steps:
       - name: Is publishing switched on?
         if: vars.FEED_DEPLOY_ENABLED != 'true'
         run: |
-          echo "::error::Publishing is switched off. Set the repo variable FEED_DEPLOY_ENABLED to true (docs/FEED-SETUP.md, step 2)."
+          echo "::error::Publishing is switched off. Set the repo variable FEED_DEPLOY_ENABLED to true."
           exit 1
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Build the feed site
+        id: site
+        run: node factory/build-site.js
+      - uses: actions/upload-pages-artifact@v3
         with:
-          node-version: 22
-      - name: Publish the feed
+          path: out/site
+
+  publish:
+    name: publish the feed
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+      - name: Check the live feed
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          FEED_PASSWORD: ${{ secrets.FEED_PASSWORD }}
-          PAGES_PROJECT: ${{ vars.PAGES_PROJECT }}
-        run: node factory/deploy.js
+          URL: ${{ steps.deploy.outputs.page_url }}
+          WANT: ${{ needs.build.outputs.site }}
+        run: |
+          for try in 1 2 3 4 5 6; do
+            got=$(curl -fsS "${URL}feed.json?t=$(date +%s)" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).clips.length)}catch{console.log('?')}})" || echo '?')
+            if [ "$got" = "$WANT" ]; then echo "The feed at $URL lists $got clips." | tee -a "$GITHUB_STEP_SUMMARY"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::The feed at $URL lists $got clips, expected $WANT." && exit 1

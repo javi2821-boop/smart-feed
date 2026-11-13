@@ -195,15 +195,6 @@
       if (!soundOn) soundBtn.hidden = false;
       if (again) activate(0);
     } catch (e) {
-      // when the sign-in has expired, the lock answers with the password page instead of JSON: reloading shows it
-      // (at most once a minute, so a real outage never turns into a reload loop)
-      let last = 0;
-      try { last = Number(sessionStorage.getItem('smartfeed.retried') || 0); } catch { last = Date.now(); }
-      if (!again && Date.now() - last > 60000) {
-        try { sessionStorage.setItem('smartfeed.retried', String(Date.now())); } catch { /* ignore */ }
-        location.reload();
-        return;
-      }
       show('The feed could not be loaded. Check the connection, then pull down or reopen to try again.');
     }
   }
